@@ -1,0 +1,75 @@
+<h2>Marker Interaction</h2>
+<p class="subtitle">When you click an incident marker on the map, what happens?</p>
+
+<div class="cards">
+
+  <div class="card" data-choice="popup" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#0d1117;padding:12px;border-radius:6px;display:flex;gap:8px;height:130px;">
+      <div style="width:36%;background:#161b22;border-radius:4px;padding:8px;display:flex;flex-direction:column;gap:4px;">
+        <div style="height:7px;background:#30363d;border-radius:2px;width:80%"></div>
+        <div style="height:5px;background:#21262d;border-radius:2px;width:60%"></div>
+        <div style="height:5px;background:#21262d;border-radius:2px;width:70%"></div>
+      </div>
+      <div style="flex:1;background:#1a2332;border-radius:4px;position:relative;overflow:hidden;">
+        <div style="position:absolute;inset:0;background:repeating-linear-gradient(45deg,#1e2d3d,#1e2d3d 10px,#1a2332 10px,#1a2332 20px);opacity:0.3"></div>
+        <div style="position:absolute;top:25%;left:45%;width:10px;height:10px;border-radius:50%;background:#ef4444;box-shadow:0 0 0 2px rgba(239,68,68,0.4)"></div>
+        <div style="position:absolute;top:15%;left:48%;background:#0f172a;border:1px solid #334155;border-radius:6px;padding:5px 7px;font-size:9px;color:#e2e8f0;white-space:nowrap;">
+          🔴 Multi-vehicle accident<br>
+          <span style="color:#64748b;font-size:8px">IH-35 N @ Exit 240</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>Map Popup</h3>
+      <p>A tooltip/popup appears directly on the map over the marker. Quick glance, doesn't disrupt the sidebar list.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="sidebar-highlight" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#0d1117;padding:12px;border-radius:6px;display:flex;gap:8px;height:130px;">
+      <div style="width:36%;background:#161b22;border-radius:4px;padding:8px;display:flex;flex-direction:column;gap:4px;">
+        <div style="height:7px;background:#30363d;border-radius:2px;width:80%"></div>
+        <div style="background:#1e3a2f;border:1px solid #22c55e;border-radius:3px;padding:5px;margin-top:2px;">
+          <div style="height:6px;background:#22c55e;border-radius:2px;width:70%;margin-bottom:3px"></div>
+          <div style="height:5px;background:#374151;border-radius:2px;width:50%"></div>
+          <div style="height:5px;background:#374151;border-radius:2px;width:60%"></div>
+        </div>
+        <div style="height:5px;background:#21262d;border-radius:2px;width:70%"></div>
+        <div style="height:5px;background:#21262d;border-radius:2px;width:50%"></div>
+      </div>
+      <div style="flex:1;background:#1a2332;border-radius:4px;position:relative;overflow:hidden;">
+        <div style="position:absolute;inset:0;background:repeating-linear-gradient(45deg,#1e2d3d,#1e2d3d 10px,#1a2332 10px,#1a2332 20px);opacity:0.3"></div>
+        <div style="position:absolute;top:25%;left:45%;width:10px;height:10px;border-radius:50%;background:#ef4444;box-shadow:0 0 0 4px rgba(239,68,68,0.3)"></div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>Sidebar Highlight</h3>
+      <p>Clicking a marker scrolls the sidebar to that incident and highlights it. Map stays clean, detail stays in the panel.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="both" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#0d1117;padding:12px;border-radius:6px;display:flex;gap:8px;height:130px;">
+      <div style="width:36%;background:#161b22;border-radius:4px;padding:8px;display:flex;flex-direction:column;gap:4px;">
+        <div style="height:7px;background:#30363d;border-radius:2px;width:80%"></div>
+        <div style="background:#1e3a2f;border:1px solid #22c55e;border-radius:3px;padding:5px;margin-top:2px;">
+          <div style="height:6px;background:#22c55e;border-radius:2px;width:70%;margin-bottom:3px"></div>
+          <div style="height:5px;background:#374151;border-radius:2px;width:55%"></div>
+        </div>
+        <div style="height:5px;background:#21262d;border-radius:2px;width:60%"></div>
+      </div>
+      <div style="flex:1;background:#1a2332;border-radius:4px;position:relative;overflow:hidden;">
+        <div style="position:absolute;inset:0;background:repeating-linear-gradient(45deg,#1e2d3d,#1e2d3d 10px,#1a2332 10px,#1a2332 20px);opacity:0.3"></div>
+        <div style="position:absolute;top:25%;left:45%;width:10px;height:10px;border-radius:50%;background:#ef4444;box-shadow:0 0 0 4px rgba(239,68,68,0.3)"></div>
+        <div style="position:absolute;top:12%;left:38%;background:#0f172a;border:1px solid #334155;border-radius:5px;padding:4px 6px;font-size:8px;color:#e2e8f0;white-space:nowrap;">
+          🔴 Multi-vehicle accident
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>Both</h3>
+      <p>Small popup on the map <em>and</em> sidebar scrolls to highlight. Best of both — context on map, full details in panel.</p>
+    </div>
+  </div>
+
+</div>

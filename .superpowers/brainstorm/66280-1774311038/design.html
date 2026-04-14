@@ -1,0 +1,169 @@
+<h2>Full Dashboard Design</h2>
+<p class="subtitle">Here's the complete layout — let me know if anything needs adjusting</p>
+
+<div class="mockup" style="max-width:900px;margin:0 auto;">
+  <div class="mockup-header">Texas Traffic Dashboard — index.html</div>
+  <div class="mockup-body" style="padding:0;overflow:hidden;background:#0d1117;">
+
+    <!-- Top bar -->
+    <div style="background:#161b22;border-bottom:1px solid #30363d;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-size:16px;">🚦</span>
+        <span style="color:#e2e8f0;font-weight:600;font-size:13px;">Texas Traffic Dashboard</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="background:#1e2d1e;border:1px solid #22c55e;color:#22c55e;font-size:9px;padding:2px 8px;border-radius:10px;">● LIVE — TxDOT 511</span>
+        <span style="color:#64748b;font-size:10px;">Refreshing in 38s</span>
+        <div style="background:#21262d;border:1px solid #30363d;color:#94a3b8;font-size:10px;padding:3px 10px;border-radius:4px;cursor:pointer;">↻ Refresh</div>
+      </div>
+    </div>
+
+    <!-- Body -->
+    <div style="display:flex;height:480px;">
+
+      <!-- Left Sidebar -->
+      <div style="width:280px;min-width:280px;background:#161b22;border-right:1px solid #30363d;display:flex;flex-direction:column;overflow:hidden;">
+
+        <!-- Summary counts -->
+        <div style="padding:12px;border-bottom:1px solid #30363d;">
+          <div style="color:#94a3b8;font-size:9px;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Incident Summary</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+            <div style="background:#1f1117;border:1px solid #3d1515;border-radius:6px;padding:8px;text-align:center;">
+              <div style="color:#ef4444;font-size:16px;font-weight:700;">12</div>
+              <div style="color:#94a3b8;font-size:9px;">Accidents</div>
+            </div>
+            <div style="background:#1f1a0f;border:1px solid #3d2c0a;border-radius:6px;padding:8px;text-align:center;">
+              <div style="color:#f97316;font-size:16px;font-weight:700;">8</div>
+              <div style="color:#94a3b8;font-size:9px;">Construction</div>
+            </div>
+            <div style="background:#1f1f0a;border:1px solid #3d3800;border-radius:6px;padding:8px;text-align:center;">
+              <div style="color:#eab308;font-size:16px;font-weight:700;">5</div>
+              <div style="color:#94a3b8;font-size:9px;">Hazards</div>
+            </div>
+            <div style="background:#0a1520;border:1px solid #0a2540;border-radius:6px;padding:8px;text-align:center;">
+              <div style="color:#3b82f6;font-size:16px;font-weight:700;">3</div>
+              <div style="color:#94a3b8;font-size:9px;">Closures</div>
+            </div>
+          </div>
+          <div style="margin-top:8px;background:#21262d;border:1px solid #30363d;border-radius:6px;padding:6px;text-align:center;">
+            <span style="color:#e2e8f0;font-size:13px;font-weight:600;">28</span>
+            <span style="color:#64748b;font-size:10px;margin-left:4px;">Total Active Incidents</span>
+          </div>
+        </div>
+
+        <!-- Filter pills -->
+        <div style="padding:10px 12px;border-bottom:1px solid #30363d;">
+          <div style="color:#94a3b8;font-size:9px;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Filter</div>
+          <div style="display:flex;flex-wrap:wrap;gap:5px;">
+            <span style="background:#ef4444;color:#fff;font-size:9px;padding:3px 8px;border-radius:10px;cursor:pointer;">Accidents</span>
+            <span style="background:#f97316;color:#fff;font-size:9px;padding:3px 8px;border-radius:10px;cursor:pointer;">Construction</span>
+            <span style="background:#eab308;color:#000;font-size:9px;padding:3px 8px;border-radius:10px;cursor:pointer;">Hazards</span>
+            <span style="background:#3b82f6;color:#fff;font-size:9px;padding:3px 8px;border-radius:10px;cursor:pointer;">Closures</span>
+            <span style="background:#30363d;color:#94a3b8;font-size:9px;padding:3px 8px;border-radius:10px;cursor:pointer;">All</span>
+          </div>
+        </div>
+
+        <!-- Incident list -->
+        <div style="flex:1;overflow-y:auto;padding:8px;">
+          <!-- Highlighted item -->
+          <div style="background:#1e2d3d;border:1px solid #3b82f6;border-radius:6px;padding:9px;margin-bottom:6px;">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+              <span style="width:8px;height:8px;border-radius:50%;background:#ef4444;flex-shrink:0;"></span>
+              <span style="color:#e2e8f0;font-size:10px;font-weight:600;">Multi-vehicle accident</span>
+            </div>
+            <div style="color:#94a3b8;font-size:9px;">IH-35 N @ Exit 240, Austin</div>
+            <div style="color:#64748b;font-size:9px;margin-top:2px;">Severity: Major · 2 lanes blocked</div>
+          </div>
+          <!-- Normal items -->
+          <div style="background:#1c2128;border:1px solid #30363d;border-radius:6px;padding:9px;margin-bottom:6px;">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+              <span style="width:8px;height:8px;border-radius:50%;background:#f97316;flex-shrink:0;"></span>
+              <span style="color:#e2e8f0;font-size:10px;font-weight:600;">Road construction</span>
+            </div>
+            <div style="color:#94a3b8;font-size:9px;">US-290 W @ Loop 360</div>
+            <div style="color:#64748b;font-size:9px;margin-top:2px;">Severity: Moderate · Until 5pm</div>
+          </div>
+          <div style="background:#1c2128;border:1px solid #30363d;border-radius:6px;padding:9px;margin-bottom:6px;">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+              <span style="width:8px;height:8px;border-radius:50%;background:#eab308;flex-shrink:0;"></span>
+              <span style="color:#e2e8f0;font-size:10px;font-weight:600;">Debris on roadway</span>
+            </div>
+            <div style="color:#94a3b8;font-size:9px;">TX-1 @ Mopac Expwy SB</div>
+            <div style="color:#64748b;font-size:9px;margin-top:2px;">Severity: Minor</div>
+          </div>
+          <div style="background:#1c2128;border:1px solid #30363d;border-radius:6px;padding:9px;">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+              <span style="width:8px;height:8px;border-radius:50%;background:#3b82f6;flex-shrink:0;"></span>
+              <span style="color:#e2e8f0;font-size:10px;font-weight:600;">Road closure</span>
+            </div>
+            <div style="color:#94a3b8;font-size:9px;">IH-10 E @ Beltway 8</div>
+            <div style="color:#64748b;font-size:9px;margin-top:2px;">Severity: Major · Full closure</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Map area -->
+      <div style="flex:1;background:#1a2332;position:relative;overflow:hidden;">
+        <div style="position:absolute;inset:0;background:repeating-linear-gradient(0deg,#1e2d3d,#1e2d3d 1px,transparent 1px,transparent 40px),repeating-linear-gradient(90deg,#1e2d3d,#1e2d3d 1px,transparent 1px,transparent 40px);opacity:0.3"></div>
+
+        <!-- Roads (simplified) -->
+        <div style="position:absolute;top:50%;left:0;right:0;height:3px;background:#243447;transform:translateY(-50%)"></div>
+        <div style="position:absolute;left:50%;top:0;bottom:0;width:3px;background:#243447;transform:translateX(-50%)"></div>
+        <div style="position:absolute;top:30%;left:20%;right:10%;height:2px;background:#1e3040;transform:rotate(-8deg)"></div>
+        <div style="position:absolute;top:65%;left:15%;right:20%;height:2px;background:#1e3040;transform:rotate(5deg)"></div>
+
+        <!-- Markers -->
+        <div style="position:absolute;top:38%;left:52%;transform:translate(-50%,-50%)">
+          <div style="width:14px;height:14px;border-radius:50%;background:#ef4444;border:2px solid #fff;box-shadow:0 0 0 4px rgba(239,68,68,0.3);cursor:pointer"></div>
+        </div>
+        <div style="position:absolute;top:55%;left:35%;transform:translate(-50%,-50%)">
+          <div style="width:14px;height:14px;border-radius:50%;background:#f97316;border:2px solid #fff;box-shadow:0 0 0 3px rgba(249,115,22,0.2)"></div>
+        </div>
+        <div style="position:absolute;top:45%;left:70%;transform:translate(-50%,-50%)">
+          <div style="width:14px;height:14px;border-radius:50%;background:#eab308;border:2px solid #fff"></div>
+        </div>
+        <div style="position:absolute;top:65%;left:60%;transform:translate(-50%,-50%)">
+          <div style="width:14px;height:14px;border-radius:50%;background:#3b82f6;border:2px solid #fff"></div>
+        </div>
+
+        <!-- Popup on selected marker -->
+        <div style="position:absolute;top:20%;left:46%;background:#0f172a;border:1px solid #334155;border-radius:8px;padding:8px 10px;font-size:9px;color:#e2e8f0;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,0.5)">
+          <div style="font-weight:600;margin-bottom:3px;">🔴 Multi-vehicle accident</div>
+          <div style="color:#94a3b8;">IH-35 N @ Exit 240</div>
+          <div style="color:#64748b;margin-top:1px;">Major · 2 lanes blocked</div>
+        </div>
+
+        <!-- Map attribution -->
+        <div style="position:absolute;bottom:6px;right:8px;color:#374151;font-size:8px;">© OpenStreetMap</div>
+
+        <!-- Zoom controls -->
+        <div style="position:absolute;top:10px;right:10px;background:#161b22;border:1px solid #30363d;border-radius:4px;overflow:hidden;">
+          <div style="color:#94a3b8;font-size:12px;padding:4px 8px;border-bottom:1px solid #30363d;cursor:pointer;text-align:center;">+</div>
+          <div style="color:#94a3b8;font-size:12px;padding:4px 8px;cursor:pointer;text-align:center;">−</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div style="background:#161b22;border-top:1px solid #30363d;padding:6px 16px;display:flex;justify-content:space-between;align-items:center;">
+      <span style="color:#64748b;font-size:9px;">Data: TxDOT 511 Public API · Map: Leaflet.js + OpenStreetMap</span>
+      <span style="color:#64748b;font-size:9px;">← Back to Projects</span>
+    </div>
+
+  </div>
+</div>
+
+<div class="section" style="margin-top:24px;">
+  <h3>Does this look right?</h3>
+  <p class="subtitle">Click to confirm or flag anything you want changed</p>
+  <div class="options" style="margin-top:12px;">
+    <div class="option" data-choice="approved" onclick="toggleSelect(this)">
+      <div class="letter">✓</div>
+      <div class="content"><h3>Looks good, let's build it</h3><p>Proceed to implementation plan</p></div>
+    </div>
+    <div class="option" data-choice="changes" onclick="toggleSelect(this)">
+      <div class="letter">✎</div>
+      <div class="content"><h3>I want to change something</h3><p>Let me describe what needs adjusting</p></div>
+    </div>
+  </div>
+</div>

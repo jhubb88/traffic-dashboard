@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Live Traffic Dashboard — Jimmy Hubbard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --dim: #64748b;
+      --red: #ef4444;
+      --orange: #f97316;
+      --yellow: #eab308;
+      --blue: #3b82f6;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', 'Segoe UI', sans-serif;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    #app {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    /* Top bar */
+    #topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 16px;
+      flex-shrink: 0;
+      gap: 12px;
+    }
+
+    /* Body */
+    #body {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* Sidebar */
+    #sidebar {
+      width: 280px;
+      min-width: 280px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Map */
+    #map {
+      flex: 1;
+      background: #1a2332;
+    }
+
+    /* Footer */
+    #footer {
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      padding: 6px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.7rem;
+      color: var(--dim);
+      flex-shrink: 0;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      #body { flex-direction: column; }
+      #sidebar { width: 100%; min-width: unset; height: 45vh; border-right: none; border-bottom: 1px solid var(--border); }
+      #map { flex: 1; min-height: 0; }
+      body { overflow: auto; }
+      #app { height: auto; min-height: 100vh; }
+    }
+
+    .section-label {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    #counts-section {
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    #counts-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+    .count-card {
+      border-radius: 6px;
+      padding: 8px;
+      text-align: center;
+      border: 1px solid;
+    }
+    .count-card .count-num { font-size: 1.2rem; font-weight: 700; }
+    .count-card .count-lbl { font-size: 0.68rem; color: var(--muted); margin-top: 2px; }
+    #total-count {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 6px;
+      text-align: center;
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+    #total-count strong { color: var(--text); margin-right: 4px; }
+    #filter-section {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    #filter-pills { display: flex; flex-wrap: wrap; gap: 6px; }
+    .filter-pill {
+      font-size: 0.7rem;
+      padding: 3px 10px;
+      border-radius: 10px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      font-weight: 600;
+      transition: opacity 0.15s;
+    }
+    .filter-pill.inactive { opacity: 0.35; }
+    #incident-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .incident-card {
+      background: #1c2128;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 9px 10px;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .incident-card:hover { background: #1e2530; }
+    .incident-card.active { border-color: var(--blue); background: #1a2535; }
+    .incident-card .card-header {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin-bottom: 3px;
+    }
+    .incident-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .incident-card .card-title { font-size: 0.78rem; font-weight: 600; }
+    .incident-card .card-location { font-size: 0.7rem; color: var(--muted); }
+    .incident-card .card-detail { font-size: 0.68rem; color: var(--dim); margin-top: 2px; text-transform: capitalize; }
+    .empty-list {
+      text-align: center;
+      color: var(--dim);
+      font-size: 0.8rem;
+      padding: 32px 16px;
+    }
+    #incident-list::-webkit-scrollbar { width: 4px; }
+    #incident-list::-webkit-scrollbar-track { background: transparent; }
+    #incident-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    #search-section {
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    #search-input {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.75rem;
+      padding: 6px 10px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    #search-input::placeholder { color: var(--dim); }
+    #search-input:focus { border-color: var(--blue); }
+
+    /* Leaflet popup dark theme */
+    .leaflet-popup-content-wrapper {
+      background: #0f172a !important;
+      border: 1px solid #334155 !important;
+      border-radius: 8px !important;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.6) !important;
+      color: var(--text) !important;
+    }
+
+    .leaflet-popup-tip {
+      background: #0f172a !important;
+    }
+
+    .leaflet-popup-close-button {
+      color: var(--muted) !important;
+    }
+
+    .leaflet-control-zoom a {
+      background: var(--surface) !important;
+      color: var(--muted) !important;
+      border-color: var(--border) !important;
+    }
+
+    .leaflet-control-zoom a:hover {
+      background: var(--bg) !important;
+      color: var(--text) !important;
+    }
+
+    .leaflet-control-attribution {
+      background: rgba(13,17,23,0.8) !important;
+      color: var(--dim) !important;
+    }
+
+    .leaflet-control-attribution a { color: var(--dim) !important; }
+
+    @keyframes markerFadeIn {
+      from { opacity: 0; transform: scale(0.5); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+
+    .leaflet-marker-icon {
+      animation: markerFadeIn 0.3s ease-out;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div id="topbar">
+      <div id="topbar-left" style="display:flex;align-items:center;gap:10px;">
+        <span style="font-size:1.2rem;">🚦</span>
+        <span style="font-weight:600;font-size:0.9rem;">Live Traffic Dashboard</span>
+      </div>
+      <div id="topbar-right" style="display:flex;align-items:center;gap:12px;">
+        <span id="source-badge"></span>
+        <span id="countdown" style="font-size:0.75rem;color:var(--dim);"></span>
+        <button onclick="resetView()" style="background:var(--bg);border:1px solid var(--border);color:var(--muted);font-size:0.75rem;padding:4px 12px;border-radius:4px;cursor:pointer;">⊕ Reset View</button>
+        <button id="refresh-btn" onclick="manualRefresh()" style="background:var(--bg);border:1px solid var(--border);color:var(--muted);font-size:0.75rem;padding:4px 12px;border-radius:4px;cursor:pointer;">↻ Refresh</button>
+      </div>
+    </div>
+    <div id="body">
+      <div id="sidebar">
+        <div id="counts-section">
+          <div class="section-label">Incident Summary</div>
+          <div id="counts-grid"></div>
+          <div id="total-count"></div>
+        </div>
+        <div id="filter-section">
+          <div class="section-label">Filter</div>
+          <div id="filter-pills"></div>
+        </div>
+        <div id="search-section">
+          <input id="search-input" type="text" placeholder="🔍  Search location, road, or type…" oninput="onSearch(this.value)">
+        </div>
+        <div id="incident-list"></div>
+      </div>
+      <div id="map"></div>
+    </div>
+    <div id="footer">
+      <span>Data: Multi-State 511 APIs · Map: Leaflet.js + OpenStreetMap</span>
+      <a href="https://jimmyhubbard2.cc/projects/" style="color:var(--dim);text-decoration:none;">← Back to Projects</a>
+    </div>
+  </div>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+// ── Simulated Data ───────────────────────────────────────────────────
+const SimulatedData = (() => {
+  const POOL = [
+    // ── Scottsdale, AZ ───────────────────────────────────────────────
+    { id:'sc-001', type:'accident',     title:'Multi-vehicle collision',      location:'Loop 101 @ Scottsdale Rd, Scottsdale AZ',      severity:'major',    lat:33.5077, lng:-111.9258, details:'2 lanes blocked' },
+    { id:'sc-002', type:'construction', title:'Road widening project',        location:'SR-51 @ Glendale Ave, Phoenix AZ',             severity:'moderate', lat:33.5385, lng:-112.0450, details:'Nightly closures 9pm–5am' },
+    { id:'sc-003', type:'hazard',       title:'Debris on roadway',            location:'US-60 @ Power Rd, Mesa AZ',                    severity:'minor',    lat:33.386505, lng:-111.696305, details:'' },
+    { id:'sc-004', type:'closure',      title:'Emergency road closure',       location:'AZ-87 @ McDowell Rd, Scottsdale AZ',           severity:'major',    lat:33.4621, lng:-111.6271, details:'Avoid area' },
+    { id:'sc-005', type:'accident',     title:'Rear-end collision',           location:'Loop 101 @ Indian Bend Rd, Scottsdale AZ',     severity:'moderate', lat:33.4977, lng:-111.9248, details:'Right shoulder blocked' },
+    { id:'sc-006', type:'construction', title:'Bridge resurfacing',           location:'SR-202 @ Dobson Rd, Tempe AZ',                 severity:'moderate', lat:33.4148, lng:-111.8273, details:'Single lane until midnight' },
+    { id:'sc-007', type:'hazard',       title:'Stalled vehicle',              location:'Loop 101 @ Pima Rd, Scottsdale AZ',            severity:'minor',    lat:33.629684, lng:-111.890280, details:'' },
+    { id:'sc-008', type:'closure',      title:'Planned lane closure',         location:'US-60 @ Val Vista Dr, Gilbert AZ',             severity:'moderate', lat:33.3558, lng:-111.7878, details:'Until 3:00 PM' },
+    { id:'sc-009', type:'accident',     title:'Commercial truck accident',    location:'Loop 101 @ Talking Stick Way, Scottsdale AZ',  severity:'major',    lat:33.653639, lng:-111.904580, details:'Hazmat team responding' },
+    { id:'sc-010', type:'construction', title:'Utility work',                 location:'Scottsdale Rd @ Camelback Rd, Scottsdale AZ',  severity:'minor',    lat:33.508314, lng:-111.926017, details:'1 lane closed' },
+
+    // ── Denver, CO ───────────────────────────────────────────────────
+    { id:'den-001', type:'accident',     title:'Jackknifed truck',            location:'I-25 @ 23rd Ave, Denver CO',                   severity:'major',    lat:39.7669, lng:-104.9977, details:'3 lanes blocked, use alternate' },
+    { id:'den-002', type:'construction', title:'Overpass construction',       location:'I-70 @ Wadsworth Blvd, Lakewood CO',           severity:'major',    lat:39.7443, lng:-105.0846, details:'Reduced to 2 lanes' },
+    { id:'den-003', type:'hazard',       title:'Ice on roadway',              location:'I-70 @ Floyd Hill, Clear Creek Canyon CO',     severity:'major',    lat:39.735167, lng:-105.428023, details:'Drive with caution' },
+    { id:'den-004', type:'closure',      title:'Road closure',                location:'I-25 @ Alameda Ave, Denver CO',                severity:'moderate', lat:39.732883, lng:-105.015752, details:'Full closure' },
+    { id:'den-005', type:'accident',     title:'Rollover accident',           location:'C-470 @ Wadsworth Blvd, Littleton CO',         severity:'major',    lat:39.5929, lng:-105.0827, details:'All lanes blocked, delays 45 min' },
+    { id:'den-006', type:'construction', title:'Lane widening',               location:'US-36 @ Sheridan Blvd, Westminster CO',        severity:'moderate', lat:39.841019, lng:-105.037651, details:'Nightly closures 9pm–5am' },
+    { id:'den-007', type:'hazard',       title:'Debris on roadway',           location:'I-225 @ Mississippi Ave, Aurora CO',           severity:'minor',    lat:39.658380, lng:-104.843111, details:'' },
+    { id:'den-008', type:'closure',      title:'Scheduled maintenance',       location:'E-470 @ Hampden Ave, Aurora CO',               severity:'minor',    lat:39.5889, lng:-104.8474, details:'Nightly 10pm–4am' },
+    { id:'den-009', type:'accident',     title:'Sideswipe collision',         location:'I-25 @ University Blvd, Denver CO',            severity:'minor',    lat:39.718648, lng:-105.005551, details:'Shoulder only' },
+    { id:'den-010', type:'construction', title:'Drainage project',            location:'I-70 @ Colorado Blvd, Denver CO',              severity:'moderate', lat:39.780205, lng:-104.931625, details:'1 lane each direction' },
+
+    // ── Salt Lake City, UT ───────────────────────────────────────────
+    { id:'slc-001', type:'accident',     title:'Multi-vehicle accident',      location:'I-15 @ 3300 S, Salt Lake City UT',             severity:'major',    lat:40.720408, lng:-111.904261, details:'2 lanes blocked' },
+    { id:'slc-002', type:'construction', title:'Road construction',           location:'I-80 @ Bangerter Hwy, West Valley City UT',    severity:'major',    lat:40.7197, lng:-111.9788, details:'Until 5:00 PM' },
+    { id:'slc-003', type:'hazard',       title:'Debris on roadway',           location:'I-215 @ 4500 S, Murray UT',                    severity:'minor',    lat:40.6896, lng:-111.8534, details:'' },
+    { id:'slc-004', type:'closure',      title:'Emergency road closure',      location:'SR-201 @ Redwood Rd, Salt Lake City UT',       severity:'major',    lat:40.696435, lng:-111.949744, details:'Full closure' },
+    { id:'slc-005', type:'accident',     title:'Rear-end collision',          location:'I-15 @ 800 N, Salt Lake City UT',              severity:'moderate', lat:40.764077, lng:-111.914198, details:'Right shoulder blocked' },
+    { id:'slc-006', type:'construction', title:'Bridge work',                 location:'I-80 @ Foothill Dr, Salt Lake City UT',        severity:'moderate', lat:40.7483, lng:-111.8484, details:'Single lane until midnight' },
+    { id:'slc-007', type:'hazard',       title:'Stalled vehicle',             location:'SR-89 @ 5400 S, Murray UT',                    severity:'minor',    lat:40.6603, lng:-111.8893, details:'' },
+    { id:'slc-008', type:'closure',      title:'Planned lane closure',        location:'I-215 @ 4800 S, Murray UT',                    severity:'moderate', lat:40.689393, lng:-111.951641, details:'Until 3:00 PM' },
+    { id:'slc-009', type:'accident',     title:'Jackknifed truck',            location:'I-15 @ US-89, Farmington UT',                  severity:'major',    lat:40.987050, lng:-111.902718, details:'3 lanes blocked, use alternate' },
+    { id:'slc-010', type:'construction', title:'Pavement resurfacing',        location:'SR-201 @ 5600 W, West Valley City UT',         severity:'minor',    lat:40.712752, lng:-112.031025, details:'Intermittent closures' },
+
+    // ── Nashville, TN ────────────────────────────────────────────────
+    { id:'nas-001', type:'accident',     title:'Multi-vehicle accident',      location:'I-40 @ I-24 interchange, Nashville TN',        severity:'major',    lat:36.150093, lng:-86.771703, details:'2 lanes blocked' },
+    { id:'nas-002', type:'construction', title:'Road construction',           location:'I-65 @ Long Hollow Pike, Goodlettsville TN',   severity:'moderate', lat:36.278000, lng:-86.733009, details:'Until 5:00 PM' },
+    { id:'nas-003', type:'hazard',       title:'Debris on roadway',           location:'I-24 @ Harding Pl, Nashville TN',              severity:'minor',    lat:36.108094, lng:-86.718556, details:'' },
+    { id:'nas-004', type:'closure',      title:'Emergency road closure',      location:'SR-840 @ Franklin Rd, Franklin TN',            severity:'major',    lat:35.917007, lng:-86.824279, details:'Full closure' },
+    { id:'nas-005', type:'accident',     title:'Rear-end collision',          location:'I-40 @ White Bridge Rd, Nashville TN',         severity:'moderate', lat:36.152972, lng:-86.854052, details:'Right shoulder blocked' },
+    { id:'nas-006', type:'construction', title:'Bridge work',                 location:'I-65 @ Trinity Ln, Nashville TN',              severity:'major',    lat:36.224268, lng:-86.773031, details:'Reduced to 2 lanes' },
+    { id:'nas-007', type:'hazard',       title:'Stalled vehicle',             location:'I-440 @ Nolensville Pike, Nashville TN',       severity:'minor',    lat:36.121017, lng:-86.760812, details:'' },
+    { id:'nas-008', type:'closure',      title:'Planned lane closure',        location:'US-70 @ Old Hickory Blvd, Nashville TN',       severity:'moderate', lat:36.148890, lng:-86.864425, details:'Until 3:00 PM' },
+    { id:'nas-009', type:'accident',     title:'Jackknifed truck',            location:'I-24 @ Antioch Pike, Nashville TN',            severity:'major',    lat:36.029831, lng:-86.637992, details:'3 lanes blocked, use alternate' },
+    { id:'nas-010', type:'construction', title:'Utility work',                location:'I-40 @ McCrory Ln, Nashville TN',              severity:'minor',    lat:36.160059, lng:-86.821283, details:'1 lane closed' },
+
+    // ── Dallas / Fort Worth, TX ──────────────────────────────────────
+    { id:'dfw-001', type:'accident',     title:'Multi-vehicle accident',      location:'I-35W @ Renfro St, Fort Worth TX',             severity:'major',    lat:32.756134, lng:-97.319415, details:'2 lanes blocked' },
+    { id:'dfw-002', type:'construction', title:'Overpass construction',       location:'I-635 @ US-75, Dallas TX',                     severity:'major',    lat:32.924425, lng:-96.762898, details:'Reduced to 2 lanes' },
+    { id:'dfw-003', type:'hazard',       title:'Stalled vehicle',             location:'I-20 @ Belt Line Rd, Grand Prairie TX',        severity:'minor',    lat:32.677150, lng:-97.059102, details:'' },
+    { id:'dfw-004', type:'closure',      title:'Water main repair',           location:'Loop 12 @ Forest Ln, Dallas TX',               severity:'moderate', lat:32.7767, lng:-96.8712, details:'Closed until further notice' },
+    { id:'dfw-005', type:'accident',     title:'Rear-end collision',          location:'SH-114 @ Kimball Ave, Southlake TX',           severity:'moderate', lat:32.945883, lng:-97.126464, details:'Shoulder blocked' },
+    { id:'dfw-006', type:'construction', title:'Lane widening project',       location:'I-30 @ Cockrell Hill Rd, Dallas TX',           severity:'moderate', lat:32.764415, lng:-96.936317, details:'Nightly closures 9pm–5am' },
+    { id:'dfw-007', type:'hazard',       title:'Debris on roadway',           location:'US-75 @ Forest Ln, Dallas TX',                 severity:'minor',    lat:32.911157, lng:-96.768569, details:'' },
+    { id:'dfw-008', type:'closure',      title:'Scheduled maintenance',       location:'I-20 @ Cedar Ridge Dr, Duncanville TX',        severity:'minor',    lat:32.664470, lng:-96.903599, details:'Nightly 10pm–4am' },
+    { id:'dfw-009', type:'accident',     title:'Commercial truck accident',   location:'I-35E @ Valley View Ln, Farmers Branch TX',    severity:'major',    lat:32.916676, lng:-96.897964, details:'Hazmat team responding' },
+    { id:'dfw-010', type:'construction', title:'Median barrier install',      location:'SH-360 @ Arkansas Ln, Arlington TX',           severity:'moderate', lat:32.720665, lng:-97.062695, details:'Until end of month' },
+  ];
+
+  // Stable active set — persists across refreshes
+  let activeIds = new Set();
+
+  function getActiveIncidents() {
+    // On first call, seed with 25 random incidents
+    if (activeIds.size === 0) {
+      const shuffled = [...POOL].sort(() => Math.random() - 0.5);
+      shuffled.slice(0, 25).forEach(i => activeIds.add(i.id));
+    } else {
+      // Each refresh: remove 2-4 and add 2-4 different ones
+      const activeArr = [...activeIds];
+      const toRemove = activeArr.sort(() => Math.random() - 0.5).slice(0, Math.floor(Math.random() * 3) + 2);
+      toRemove.forEach(id => activeIds.delete(id));
+      const inactive = POOL.filter(i => !activeIds.has(i.id));
+      const toAdd = inactive.sort(() => Math.random() - 0.5).slice(0, toRemove.length);
+      toAdd.forEach(i => activeIds.add(i.id));
+    }
+    return POOL
+      .filter(i => activeIds.has(i.id))
+      .map(i => ({ ...i, updatedAt: new Date().toLocaleTimeString() }));
+  }
+
+  return { getActiveIncidents };
+})();
+
+// ── Data Sources ─────────────────────────────────────────────────────
+const DataSources = (() => {
+  const TIMEOUT_MS = 3000;
+
+  function fetchWithTimeout(url, options = {}) {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), TIMEOUT_MS);
+    return fetch(url, { ...options, signal: controller.signal })
+      .finally(() => clearTimeout(id));
+  }
+
+  // Map TxDOT severity strings to internal scale
+  function mapSeverity(raw) {
+    if (!raw) return 'minor';
+    const r = String(raw).toLowerCase();
+    if (r.includes('major') || r.includes('high') || r === '3') return 'major';
+    if (r.includes('moderate') || r.includes('medium') || r === '2') return 'moderate';
+    return 'minor';
+  }
+
+  function mapType(raw) {
+    if (!raw) return 'hazard';
+    const r = String(raw).toLowerCase();
+    if (r.includes('accid') || r.includes('crash') || r.includes('collision')) return 'accident';
+    if (r.includes('construct') || r.includes('roadwork') || r.includes('work')) return 'construction';
+    if (r.includes('clos')) return 'closure';
+    return 'hazard';
+  }
+
+  function normalizeTxDOT(raw) {
+    // TxDOT 511 returns an array of event objects
+    if (!Array.isArray(raw)) return null;
+    return raw
+      .map(e => ({
+        id: String(e.ID || e.id || Math.random()),
+        type: mapType(e.EventType || e.eventType || ''),
+        title: e.EventDescription || e.eventDescription || e.EventType || 'Incident',
+        location: e.RoadwayName ? `${e.RoadwayName}${e.DirectionOfTravel ? ' @ ' + e.DirectionOfTravel : ''}` : (e.location || ''),
+        severity: mapSeverity(e.Severity || e.severity || ''),
+        lat: parseFloat(e.Latitude || e.latitude || 0),
+        lng: parseFloat(e.Longitude || e.longitude || 0),
+        details: e.LanesAffected || e.lanesAffected || '',
+        updatedAt: e.LastUpdated || e.lastUpdated || new Date().toLocaleTimeString()
+      }))
+      .filter(i => i.lat !== 0 && i.lng !== 0);
+  }
+
+  function normalizeSF511(raw) {
+    // SF 511 returns { events: { event: [...] } }
+    const events = raw?.events?.event || raw?.Events?.Event || raw || [];
+    if (!Array.isArray(events)) return null;
+    return events
+      .map(e => ({
+        id: String(e.id || e.ID || Math.random()),
+        type: mapType(e.event_type || e.EventType || ''),
+        title: e.headline || e.Headline || e.event_type || 'Incident',
+        location: e.roads_affected || e.RoadsAffected || '',
+        severity: mapSeverity(e.severity || e.Severity || ''),
+        lat: parseFloat(e.geography?.coordinates?.[1] || e.Latitude || 0),
+        lng: parseFloat(e.geography?.coordinates?.[0] || e.Longitude || 0),
+        details: e.description || e.Description || '',
+        updatedAt: e.updated || new Date().toLocaleTimeString()
+      }))
+      .filter(i => i.lat !== 0 && i.lng !== 0);
+  }
+
+  async function tryTxDOT() {
+    const endpoints = [
+      'https://www.drivetexas.org/api/traffic/getIncidents',
+      'https://traffic.511tx.org/api/v2/get/event',
+    ];
+    for (const url of endpoints) {
+      try {
+        const res = await fetchWithTimeout(url);
+        if (!res.ok) continue;
+        const data = await res.json();
+        const normalized = normalizeTxDOT(data);
+        if (normalized && normalized.length > 0) return { incidents: normalized, source: 'txdot' };
+      } catch (_) { /* continue */ }
+    }
+    return null;
+  }
+
+  async function trySF511() {
+    // Free public key — acceptable for client-side portfolio project
+    const API_KEY = '2f474470-ca0b-4821-a880-1c0cbf1c1f5d';
+    const url = `https://api.511.org/traffic/events?api_key=${API_KEY}&format=json`;
+    try {
+      const res = await fetchWithTimeout(url);
+      if (!res.ok) return null;
+      const data = await res.json();
+      const normalized = normalizeSF511(data);
+      if (normalized && normalized.length > 0) return { incidents: normalized, source: 'sf511' };
+    } catch (_) { /* continue */ }
+    return null;
+  }
+
+  async function fetchIncidents() {
+    const result = await tryTxDOT() || await trySF511();
+    if (result) return result;
+    // Demo Mode — guaranteed
+    return { incidents: SimulatedData.getActiveIncidents(), source: 'demo' };
+  }
+
+  return { fetchIncidents };
+})();
+
+// ── Map ──────────────────────────────────────────────────────────────
+const MapManager = (() => {
+  const MAP_CENTER = [38.5, -96.0];
+  const DEFAULT_ZOOM = 5;
+  let map, markersLayer;
+
+  function init() {
+    map = L.map('map', { zoomControl: true }).setView(MAP_CENTER, DEFAULT_ZOOM);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      maxZoom: 18
+    }).addTo(map);
+    markersLayer = L.layerGroup().addTo(map);
+  }
+
+  function getMap() { return map; }
+  function getMarkersLayer() { return markersLayer; }
+  function getDefaultCenter() { return MAP_CENTER; }
+  function getDefaultZoom() { return DEFAULT_ZOOM; }
+
+  return { init, getMap, getMarkersLayer, getDefaultCenter, getDefaultZoom };
+})();
+
+// ── Marker Rendering ─────────────────────────────────────────────────
+const INCIDENT_COLORS = {
+  accident:     '#ef4444',
+  construction: '#f97316',
+  hazard:       '#eab308',
+  closure:      '#3b82f6'
+};
+
+function makeIcon(type) {
+  const color = INCIDENT_COLORS[type] || '#94a3b8';
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18">
+    <circle cx="9" cy="9" r="7" fill="${color}" stroke="white" stroke-width="2"/>
+  </svg>`;
+  return L.divIcon({
+    html: `<div style="filter:drop-shadow(0 0 4px ${color}88)">${svg}</div>`,
+    className: '',
+    iconSize: [18, 18],
+    iconAnchor: [9, 9],
+    popupAnchor: [0, -12]
+  });
+}
+
+// ── Sidebar ───────────────────────────────────────────────────────────
+const COUNT_CONFIG = [
+  { type: 'accident',     color: '#ef4444', bg: '#1f1117', border: '#3d1515', label: 'Accidents' },
+  { type: 'construction', color: '#f97316', bg: '#1f1a0f', border: '#3d2c0a', label: 'Construction' },
+  { type: 'hazard',       color: '#eab308', bg: '#1f1f0a', border: '#3d3800', label: 'Hazards' },
+  { type: 'closure',      color: '#3b82f6', bg: '#0a1520', border: '#0a2540', label: 'Closures' },
+];
+
+function updateCounts() {
+  const filtered = getFiltered();
+  const grid = document.getElementById('counts-grid');
+  grid.innerHTML = COUNT_CONFIG.map(c => {
+    const n = filtered.filter(i => i.type === c.type).length;
+    return `<div class="count-card" style="background:${c.bg};border-color:${c.border};">
+      <div class="count-num" style="color:${c.color}">${n}</div>
+      <div class="count-lbl">${c.label}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('total-count').innerHTML =
+    `<strong>${filtered.length}</strong> Total Active Incidents`;
+}
+
+function renderFilterPills() {
+  const container = document.getElementById('filter-pills');
+  const pillDefs = [
+    ...COUNT_CONFIG.map(c => ({ type: c.type, color: c.color, label: c.label })),
+    { type: 'all', color: '#30363d', label: 'All' }
+  ];
+  container.innerHTML = pillDefs.map(p => {
+    const isActive = p.type === 'all' ? activeFilters.size === 4 : activeFilters.has(p.type);
+    const textColor = p.type === 'hazard' ? '#000' : '#fff';
+    return `<button class="filter-pill ${isActive ? '' : 'inactive'}"
+      style="background:${p.color};color:${textColor};"
+      onclick="toggleFilter('${p.type}')">${p.label}</button>`;
+  }).join('');
+}
+
+function toggleFilter(type) {
+  if (type === 'all') {
+    activeFilters = new Set(['accident', 'construction', 'hazard', 'closure']);
+  } else {
+    const onlyThisActive = activeFilters.size === 1 && activeFilters.has(type);
+    if (onlyThisActive) {
+      activeFilters = new Set(['accident', 'construction', 'hazard', 'closure']);
+    } else {
+      activeFilters = new Set([type]);
+    }
+  }
+  renderFilterPills();
+  renderMap();
+  renderSidebar();
+  updateCounts();
+}
+
+const SEVERITY_ORDER = { major: 0, moderate: 1, minor: 2 };
+
+function renderSidebar() {
+  renderFilterPills();
+  const list = document.getElementById('incident-list');
+  const filtered = getFiltered()
+    .slice()
+    .sort((a, b) => (SEVERITY_ORDER[a.severity] ?? 2) - (SEVERITY_ORDER[b.severity] ?? 2));
+
+  if (filtered.length === 0) {
+    list.innerHTML = '<div class="empty-list">No incidents to display</div>';
+    return;
+  }
+
+  list.innerHTML = filtered.map(i => {
+    const color = INCIDENT_COLORS[i.type] || '#94a3b8';
+    return `<div class="incident-card" id="card-${esc(i.id)}" onclick="onCardClick('${esc(i.id)}')">
+      <div class="card-header">
+        <span class="incident-dot" style="background:${color}"></span>
+        <span class="card-title">${esc(i.title)}</span>
+      </div>
+      <div class="card-location">${esc(i.location)}</div>
+      <div class="card-detail">${esc(i.severity)}${i.details ? ' · ' + esc(i.details) : ''}</div>
+    </div>`;
+  }).join('');
+}
+
+function highlightSidebarCard(id) {
+  document.querySelectorAll('.incident-card').forEach(el => el.classList.remove('active'));
+  const card = document.getElementById(`card-${id}`);
+  if (card) {
+    card.classList.add('active');
+    card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+}
+
+function onCardClick(id) {
+  highlightSidebarCard(id);
+  const incident = currentIncidents.find(i => i.id === id);
+  if (!incident) return;
+  const map = MapManager.getMap();
+  map.setView([incident.lat, incident.lng], 12, { animate: true });
+  MapManager.getMarkersLayer().eachLayer(layer => {
+    if (layer._incidentId === id) layer.openPopup();
+  });
+}
+
+let currentIncidents = [];
+let activeFilters = new Set(['accident', 'construction', 'hazard', 'closure']);
+let searchQuery = '';
+let activeCity = null;
+
+function getCityFromId(id) {
+  if (id.startsWith('sc-'))  return 'Scottsdale';
+  if (id.startsWith('den-')) return 'Denver';
+  if (id.startsWith('slc-')) return 'Salt Lake City';
+  if (id.startsWith('nas-')) return 'Nashville';
+  if (id.startsWith('dfw-')) return 'Dallas/Fort Worth';
+  return null;
+}
+
+function onSearch(val) {
+  searchQuery = val.trim().toLowerCase();
+  renderMap();
+  renderSidebar();
+  updateCounts();
+}
+
+function renderIncidents(incidents) {
+  currentIncidents = incidents;
+  renderMap();
+  renderSidebar();
+  updateCounts();
+}
+
+function getFiltered() {
+  return currentIncidents.filter(i => {
+    if (!activeFilters.has(i.type)) return false;
+    if (activeCity && getCityFromId(i.id) !== activeCity) return false;
+    if (!searchQuery) return true;
+    return i.location.toLowerCase().includes(searchQuery) ||
+           i.title.toLowerCase().includes(searchQuery) ||
+           i.type.toLowerCase().includes(searchQuery);
+  });
+}
+
+function renderMap() {
+  const layer = MapManager.getMarkersLayer();
+  layer.clearLayers();
+  getFiltered().forEach(incident => {
+    const marker = L.marker([incident.lat, incident.lng], { icon: makeIcon(incident.type) })
+      .bindPopup(makePopupHTML(incident), { autoPan: false })
+      .on('click', () => {
+        activeCity = getCityFromId(incident.id);
+        renderSidebar();
+        updateCounts();
+        highlightSidebarCard(incident.id);
+        MapManager.getMap().setView([incident.lat, incident.lng], 12, { animate: true });
+      });
+    marker._incidentId = incident.id;
+    layer.addLayer(marker);
+  });
+}
+
+function esc(str) {
+  return String(str ?? '')
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function makePopupHTML(i) {
+  const color = INCIDENT_COLORS[i.type] || '#94a3b8';
+  return `
+    <div style="font-family:Inter,sans-serif;min-width:160px;">
+      <div style="font-weight:600;font-size:0.8rem;margin-bottom:4px;">
+        <span style="color:${color}">●</span> ${esc(i.title)}
+      </div>
+      <div style="font-size:0.72rem;color:#94a3b8;">${esc(i.location)}</div>
+      <div style="font-size:0.72rem;color:#64748b;margin-top:2px;text-transform:capitalize;">${esc(i.severity)}${i.details ? ' · ' + esc(i.details) : ''}</div>
+    </div>`;
+}
+
+function updateSourceBadge(source) {
+  const el = document.getElementById('source-badge');
+  const styles = {
+    txdot: { bg:'#1e2d1e', border:'#22c55e', color:'#22c55e', label:'● LIVE — TxDOT 511' },
+    sf511: { bg:'#1e2d1e', border:'#22c55e', color:'#22c55e', label:'● LIVE — SF Bay 511' },
+    demo:  { bg:'#2d2a1e', border:'#eab308', color:'#eab308', label:'◎ DEMO MODE' }
+  };
+  const s = styles[source] || styles.demo;
+  el.style.cssText = `background:${s.bg};border:1px solid ${s.border};color:${s.color};font-size:0.7rem;padding:2px 10px;border-radius:10px;font-weight:600;`;
+  el.textContent = s.label;
+}
+
+async function loadData() {
+  const { incidents, source } = await DataSources.fetchIncidents();
+  updateSourceBadge(source);
+  renderIncidents(incidents);
+}
+
+// ── Refresh Manager ──────────────────────────────────────────────────
+const RefreshManager = (() => {
+  const INTERVAL = 300;
+  let countdown = INTERVAL;
+  let timer = null;
+
+  function updateDisplay() {
+    const el = document.getElementById('countdown');
+    if (el) el.textContent = `Refreshing in ${countdown}s`;
+  }
+
+  async function refresh() {
+    countdown = INTERVAL;
+    activeCity = null;
+    MapManager.getMap().closePopup();
+    const { incidents, source } = await DataSources.fetchIncidents();
+    updateSourceBadge(source);
+    renderIncidents(incidents);
+  }
+
+  function start() {
+    updateDisplay();
+    timer = setInterval(async () => {
+      countdown--;
+      updateDisplay();
+      if (countdown <= 0) {
+        countdown = INTERVAL;
+        await refresh();
+      }
+    }, 1000);
+  }
+
+  function reset() {
+    countdown = INTERVAL;
+    updateDisplay();
+  }
+
+  return { start, reset, refresh };
+})();
+
+function resetView() {
+  activeCity = null;
+  renderSidebar();
+  updateCounts();
+  const map = MapManager.getMap();
+  map.closePopup();
+  map.setView(MapManager.getDefaultCenter(), MapManager.getDefaultZoom(), { animate: true });
+}
+
+async function manualRefresh() {
+  RefreshManager.reset();
+  await RefreshManager.refresh();
+}
+
+// Boot sequence
+MapManager.init();
+loadData().then(() => RefreshManager.start());
+  </script>
+</body>
+</html>

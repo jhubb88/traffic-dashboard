@@ -1,0 +1,68 @@
+<h2>Dashboard Layout</h2>
+<p class="subtitle">Where should the incident panel live relative to the map?</p>
+
+<div class="cards">
+
+  <div class="card" data-choice="left-sidebar" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#0d1117;padding:12px;border-radius:6px;display:flex;gap:8px;height:120px;">
+      <div style="width:38%;background:#161b22;border-radius:4px;display:flex;flex-direction:column;gap:4px;padding:8px;">
+        <div style="height:8px;background:#30363d;border-radius:2px;width:80%"></div>
+        <div style="height:6px;background:#21262d;border-radius:2px;width:60%"></div>
+        <div style="height:6px;background:#21262d;border-radius:2px;width:70%"></div>
+        <div style="height:6px;background:#21262d;border-radius:2px;width:50%"></div>
+      </div>
+      <div style="flex:1;background:#1a2332;border-radius:4px;position:relative;overflow:hidden;">
+        <div style="position:absolute;inset:0;background:repeating-linear-gradient(45deg,#1e2d3d,#1e2d3d 10px,#1a2332 10px,#1a2332 20px);opacity:0.4"></div>
+        <div style="position:absolute;top:30%;left:40%;width:10px;height:10px;border-radius:50%;background:#ef4444"></div>
+        <div style="position:absolute;top:55%;left:60%;width:10px;height:10px;border-radius:50%;background:#f97316"></div>
+        <div style="position:absolute;top:45%;left:25%;width:10px;height:10px;border-radius:50%;background:#eab308"></div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>Left Sidebar</h3>
+      <p>Panel on left, map fills remaining space. Classic dashboard feel. Easy to scan incidents while viewing the map.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="right-sidebar" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#0d1117;padding:12px;border-radius:6px;display:flex;gap:8px;height:120px;">
+      <div style="flex:1;background:#1a2332;border-radius:4px;position:relative;overflow:hidden;">
+        <div style="position:absolute;inset:0;background:repeating-linear-gradient(45deg,#1e2d3d,#1e2d3d 10px,#1a2332 10px,#1a2332 20px);opacity:0.4"></div>
+        <div style="position:absolute;top:30%;left:40%;width:10px;height:10px;border-radius:50%;background:#ef4444"></div>
+        <div style="position:absolute;top:55%;left:60%;width:10px;height:10px;border-radius:50%;background:#f97316"></div>
+        <div style="position:absolute;top:45%;left:25%;width:10px;height:10px;border-radius:50%;background:#eab308"></div>
+      </div>
+      <div style="width:38%;background:#161b22;border-radius:4px;display:flex;flex-direction:column;gap:4px;padding:8px;">
+        <div style="height:8px;background:#30363d;border-radius:2px;width:80%"></div>
+        <div style="height:6px;background:#21262d;border-radius:2px;width:60%"></div>
+        <div style="height:6px;background:#21262d;border-radius:2px;width:70%"></div>
+        <div style="height:6px;background:#21262d;border-radius:2px;width:50%"></div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>Right Sidebar</h3>
+      <p>Map on left (primary), panel on right. Natural reading flow — eyes move left to right from map to details.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="bottom-drawer" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#0d1117;padding:12px;border-radius:6px;display:flex;flex-direction:column;gap:8px;height:120px;">
+      <div style="flex:1;background:#1a2332;border-radius:4px;position:relative;overflow:hidden;">
+        <div style="position:absolute;inset:0;background:repeating-linear-gradient(45deg,#1e2d3d,#1e2d3d 10px,#1a2332 10px,#1a2332 20px);opacity:0.4"></div>
+        <div style="position:absolute;top:30%;left:40%;width:10px;height:10px;border-radius:50%;background:#ef4444"></div>
+        <div style="position:absolute;top:55%;left:60%;width:10px;height:10px;border-radius:50%;background:#f97316"></div>
+      </div>
+      <div style="height:35%;background:#161b22;border-radius:4px;display:flex;align-items:center;gap:8px;padding:6px 10px;">
+        <div style="height:6px;background:#30363d;border-radius:2px;width:20%"></div>
+        <div style="height:6px;background:#21262d;border-radius:2px;width:15%"></div>
+        <div style="height:6px;background:#21262d;border-radius:2px;width:25%"></div>
+        <div style="height:6px;background:#21262d;border-radius:2px;width:15%"></div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>Bottom Panel</h3>
+      <p>Full-width map on top, incident list scrolls below. Better on mobile/widescreen. Map gets maximum width.</p>
+    </div>
+  </div>
+
+</div>
