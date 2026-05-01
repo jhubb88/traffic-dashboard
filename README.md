@@ -44,18 +44,7 @@ Open `http://localhost:8080`. No build step, no dependencies to install. Live AP
 
 ## Deployment
 
-Deployed manually to AWS S3 + CloudFront. There is no CI/CD workflow:
-
-```bash
-aws s3 sync . s3://jimmy-traffic-dashboard \
-  --profile portfolio-user \
-  --exclude ".git/*"
-
-aws cloudfront create-invalidation \
-  --distribution-id E3H1V6C42HG9P1 \
-  --paths "/*" \
-  --profile portfolio-user
-```
+Deploys automatically on push to main via GitHub Actions (.github/workflows/deploy.yml). S3 sync + CloudFront invalidation handled by the workflow.
 
 **S3 bucket:** `jimmy-traffic-dashboard` (us-east-1)
 
