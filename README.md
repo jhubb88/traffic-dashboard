@@ -2,7 +2,7 @@
 
 Multi-city traffic incident map with a simulated data feed and live-API fallback cascade.
 
-**Live demo:** https://d1t5py05a4uugi.cloudfront.net
+**Live demo:** https://traffic-dashboard.jimmyhubbard2.cc
 
 ## Overview
 
