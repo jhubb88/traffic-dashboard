@@ -9,6 +9,10 @@
 </defs>
 <rect width="1020" height="360" fill="white"/>
 
+<!-- NOT DEPLOYED banner -->
+<rect x="0" y="0" width="1020" height="26" fill="#DC2626"/>
+<text x="510" y="18" text-anchor="middle" font-size="14" font-weight="700" fill="white" letter-spacing="0.5">⚠️ NOT DEPLOYED — Future architecture (planned). Currently a static frontend; Lambda proxy not yet built.</text>
+
 <!-- CI/CD GROUP -->
 <rect x="20" y="30" width="170" height="230" rx="8" fill="#FEF3C7" stroke="#F59E0B" stroke-width="1"/>
 <text x="30" y="47" font-size="9" fill="#B45309" font-weight="700" letter-spacing="0.5">CI/CD</text>
@@ -106,5 +110,5 @@
 <text x="799" y="232" text-anchor="middle" font-size="9" fill="#15803d">No browser-to-API contact · browser only calls Lambda Function URL (same-origin via CloudFront)</text>
 
 <!-- Caption -->
-<text x="510" y="340" text-anchor="middle" font-size="9.5" fill="#9ca3af">Texas Traffic Dashboard — Production Architecture · CloudFront HTTPS · Lambda proxy for live TxDOT data · CloudWatch monitoring</text>
+<text x="510" y="340" text-anchor="middle" font-size="9.5" fill="#9ca3af">Texas Traffic Dashboard — Planned Architecture (not deployed) · CloudFront HTTPS · Lambda proxy for live TxDOT data · CloudWatch monitoring</text>
 </svg>
