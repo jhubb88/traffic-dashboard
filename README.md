@@ -4,6 +4,8 @@ Multi-city traffic incident map with a simulated data feed and live-API fallback
 
 **Live demo:** https://traffic-dashboard.jimmyhubbard2.cc
 
+**Full documentation:** [PROJECT_MASTER.md](./PROJECT_MASTER.md) — architecture, AWS operational reference, build history, and key decisions
+
 ## Overview
 
 The Live Traffic Dashboard displays active traffic incidents across five US cities on an interactive Leaflet map. It attempts to pull real incident data from TxDOT 511 and SF511, falling back to a stable simulated dataset when those APIs are unavailable (CORS restrictions block direct calls from a static host without a proxy). Incidents are color-coded by severity, filterable by type, and linked between the map and a scrollable sidebar.
