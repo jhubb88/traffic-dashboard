@@ -1,6 +1,6 @@
 # Live Traffic Dashboard
 
-Multi-city traffic incident map with a simulated data feed and live-API fallback cascade.
+Multi-city traffic incident map. Live 511 APIs are CORS-blocked from a static host, so a built-in simulated dataset renders today. Lambda proxy planned to unblock live data.
 
 **Live demo:** https://traffic-dashboard.jimmyhubbard2.cc
 
